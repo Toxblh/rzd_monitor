@@ -128,6 +128,7 @@ class rzd {
 
 echo 'Start';
 
+// TODO: Избавиться от муторных вводов кодов назначений
 $rzd = new rzd();
 $rzd->request([
     'Москва',
