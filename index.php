@@ -53,7 +53,7 @@ class rzd {
         $result = $result['tp'][0]['list'];
         $tr_number = "";
         foreach ($result as $train) {
-            if (isset($train['cars']) && is_array($train['cars']))
+            if (isset($train['cars']) && is_array($train['cars'])) {
                 foreach ($train['cars'] as $ticket) {
                     # здесь можно написать условие, например если цена меньше 4000р то делаем все что ниже и высылаем смс
                     if ($ticket['type'] === 'Плац' && $tr_number != $train['number']) {
@@ -83,7 +83,7 @@ class rzd {
                         $train['bEntire'],
                         $train['brand'],
                         $train['carrier'],
-                        $train['tnum0']
+                        $train['number']
                       ];
 
                       $reqSeats = str_replace($replaceSeat, $dataSeat, $reqSeats);
@@ -96,33 +96,32 @@ class rzd {
                       curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookie);
                       $result = json_decode(curl_exec($ch), true);
 
-                      var_dump($result);
-
                       sleep(4);
                       $reqSeats .= str_replace($this->replaceSecure, [$result['RID']], $this->secure);
 
-                      // TODO:Пока ошибка общения со шлюзом, надо понять, что за фигня
-                      // var_dump($this->urlMain . $this->UrlEncode($reqSeats));
-                      // $ch = curl_init($this->urlMain . $this->UrlEncode($reqSeats));
-                      // curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                      // curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookie);
-                      // curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookie);
-                      // $result = json_decode(curl_exec($ch), true);
-                      //
-                      // var_dump($result);
+                      var_dump($this->urlMain . $this->UrlEncode($reqSeats));
+                      $ch = curl_init($this->urlMain . $this->UrlEncode($reqSeats));
+                      curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                      curl_setopt($ch, CURLOPT_COOKIEJAR, $this->cookie);
+                      curl_setopt($ch, CURLOPT_COOKIEFILE, $this->cookie);
+                      $result = json_decode(curl_exec($ch), true);
+
+                      $result = $result['lst'][0]['cars'];
+                      foreach ($result as $car) {
+                          $resultExec .= "\t" . 'Вагон ' . $car['cnumber'] . ' ' . $car['carrier'] . "\n\t" . $car['typeLoc'] . '(' . $car['clsType'] . ')' . "\n\tЦена: " . $car['tariff'] . "\n\tМеста: " . $car['places'] . "\n";
+                          foreach ($car['seats'] as $seats) {
+                            $resultExec .= "\t\t" . str_replace('&nbsp;', ' ', $seats['label']) . ': ' . $seats['free'] . "\n";
+                          }
+                      }
 
                       curl_close($ch);
                       unset($ch);
                       unlink($this->cookie);
-
                     }
-
                 }
+            }
         }
-
         echo $resultExec;
-
-
     }
 }
 
